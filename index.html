@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>India's Social Media App - Public Survey (Fixed)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0f0f23 0%,#1a1a2e 25%,#16213e 50%,#0f3460 75%,#1e1e2e 100%);position:relative;overflow-x:hidden}
+    .stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+    .star{position:absolute;background:white;border-radius:50%;animation:twinkle 3s infinite}
+    @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.8}}
+    .glass-card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1)}
+    .glow-orange{box-shadow:0 0 20px rgba(255,153,51,.3)}
+    .glow-green{box-shadow:0 0 20px rgba(34,197,94,.3)}
+  </style>
+</head>
+<body class="min-h-screen text-white">
+  <div class="stars" id="starfield"></div>
+
+  <div class="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+    <div class="text-center mb-8">
+      <div class="flex justify-center items-center mb-4">
+        <span class="text-6xl mr-3">🇮🇳</span>
+        <h1 class="text-4xl font-bold text-white">India's Social Media Revolution</h1>
+      </div>
+      <p class="text-xl text-gray-300 mb-2">Help us build India's own social media platform!</p>
+      <p class="text-lg text-orange-400 font-semibold glow-orange">Target: 10 Million YES votes from unique users</p>
+    </div>
+
+    <!-- Progress Overview -->
+    <div class="glass-card rounded-xl p-6 mb-8 glow-green">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-green-400" id="yesCount">2,847,392</div>
+          <div class="text-sm text-gray-400">YES Votes</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-red-400" id="noCount">156,234</div>
+          <div class="text-sm text-gray-400">NO Votes</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-blue-400" id="progressPercent">28.5%</div>
+          <div class="text-sm text-gray-400">Progress to Goal</div>
+        </div>
+      </div>
+      <div class="w-full bg-gray-800 rounded-full h-4 mb-4 border border-gray-600">
+        <div class="bg-gradient-to-r from-orange-500 to-green-500 h-4 rounded-full transition-all duration-500 glow-orange" id="progressBar" style="width:28.5%"></div>
+      </div>
+      <div class="text-center text-sm text-gray-300">
+        <span id="remaining" class="text-orange-400">7,152,608</span> more YES votes needed to reach 10 million!
+      </div>
+    </div>
+
+    <!-- Survey Form (no real backend; local demo w/ localStorage uniqueness) -->
+    <div class="glass-card rounded-xl p-8 mb-8">
+      <h2 class="text-2xl font-bold text-white mb-6 text-center">Cast Your Vote</h2>
+      <form id="voteForm" class="space-y-6">
+        <fieldset>
+          <legend class="block text-lg font-semibold text-gray-200 mb-4">Do you support creating an indigenous Indian social media platform?</legend>
+          <div class="space-y-3">
+            <label class="flex items-center p-4 border-2 border-gray-600 rounded-lg hover:border-green-400 cursor-pointer transition-all duration-300 hover:bg-green-500/10">
+              <input type="radio" name="vote" value="yes" class="mr-4 w-5 h-5 text-green-600 accent-green-500">
+              <span class="text-lg text-white">🇮🇳 YES - I support India's own social media app!</span>
+            </label>
+            <label class="flex items-center p-4 border-2 border-gray-600 rounded-lg hover:border-red-400 cursor-pointer transition-all duration-300 hover:bg-red-500/10">
+              <input type="radio" name="vote" value="no" class="mr-4 w-5 h-5 text-red-600 accent-red-500">
+              <span class="text-lg text-white">❌ NO - I don't think it's necessary</span>
+            </label>
+          </div>
+        </fieldset>
+        <div>
+          <label for="userEmail" class="block text-sm font-medium text-gray-300 mb-2">Email (for uniqueness; demo only)</label>
+          <input type="email" id="userEmail" required class="w-full p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-800/50 text-white placeholder-gray-400" placeholder="your.email@example.com">
+        </div>
+        <button id="submitBtn" class="w-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-bold py-4 px-6 rounded-lg hover:from-orange-600 hover:to-green-700 transform hover:scale-105 transition-all duration-200 text-lg glow-orange">Submit My Vote 🗳️</button>
+      </form>
+    </div>
+
+    <!-- Live Graph -->
+    <div class="glass-card rounded-xl p-6">
+      <h3 class="text-xl font-bold text-white mb-4 text-center">Live Voting Progress</h3>
+      <div class="h-64"><canvas id="votingChart"></canvas></div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="glass-card rounded-xl p-6 mt-8">
+      <h3 class="text-xl font-bold text-white mb-4">Recent Votes</h3>
+      <div id="recentActivity" class="space-y-2 max-h-48 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- Email OTP Modal (demo-only acceptance) -->
+  <div id="verificationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="glass-card rounded-xl p-8 max-w-md w-full mx-4">
+      <div class="text-center mb-6">
+        <div class="text-4xl mb-4">📧</div>
+        <h3 class="text-2xl font-bold text-white mb-2">Email Verification</h3>
+        <p class="text-gray-300">Enter the 6-digit code sent to your email.</p>
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-300 mb-2">Verification Code</label>
+        <input type="text" id="verificationCode" maxlength="6" inputmode="numeric" pattern="\\d{6}" class="w-full p-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-800/50 text-white placeholder-gray-400 text-center text-2xl tracking-widest" placeholder="000000" required>
+      </div>
+      <div class="flex gap-4">
+        <button id="cancelVerify" class="flex-1 bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-200">Cancel</button>
+        <button id="confirmVerify" class="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white font-bold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-green-700 transition-all duration-200">Verify & Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ------------------ State ------------------
+      const currentData = { yes: 2847392, no: 156234, target: 10_000_000 };
+      let chart; let pendingVote = null; let pendingEmail = null; let processing = false;
+
+      // Persisted uniqueness (client-side demo ONLY)
+      const STORAGE_KEY = 'votedUsersV1';
+      const votedUsers = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+      function persistVoters(){ localStorage.setItem(STORAGE_KEY, JSON.stringify([...votedUsers])); }
+
+      // ------------------ Utils ------------------
+      function isValidEmail(e){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); }
+      function maskEmail(e){
+        if(!e || !e.includes('@')) return '***@***';
+        const [user, dom] = e.split('@');
+        const head = user.slice(0, Math.min(3, user.length));
+        return `${head}***@${dom}`;
+      }
+      function calcProgress(yes, target){
+        const pct = Math.max(0, Math.min(100, (yes/target)*100));
+        return { pct: +pct.toFixed(1), remaining: Math.max(0, target-yes) };
+      }
+
+      // ------------------ UI helpers ------------------
+      function updateDisplay(){
+        document.getElementById('yesCount').textContent = currentData.yes.toLocaleString();
+        document.getElementById('noCount').textContent = currentData.no.toLocaleString();
+        const { pct, remaining } = calcProgress(currentData.yes, currentData.target);
+        document.getElementById('progressPercent').textContent = pct + '%';
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('remaining').textContent = remaining.toLocaleString();
+      }
+
+      function showToast(message, ok=true){
+        const div = document.createElement('div');
+        div.className = `fixed top-4 right-4 ${ok?'bg-green-500':'bg-rose-500'} text-white px-6 py-3 rounded-lg shadow-lg z-50 translate-x-full transition-transform duration-300`;
+        div.textContent = message; document.body.appendChild(div);
+        requestAnimationFrame(()=>div.classList.remove('translate-x-full'));
+        setTimeout(()=>{ div.classList.add('translate-x-full'); setTimeout(()=>div.remove(), 300); }, 3000);
+      }
+
+      function addRecentActivity(vote, email){
+        const activityDiv = document.getElementById('recentActivity');
+        const newDiv = document.createElement('div');
+        const ts = new Date().toLocaleTimeString();
+        newDiv.className = 'flex justify-between items-center p-2 bg-gray-800/30 rounded border border-gray-600';
+        newDiv.innerHTML = `<span class="text-gray-200">${maskEmail(email)} voted <strong class="${vote==='yes'?'text-green-400':'text-red-400'}">${vote.toUpperCase()}</strong></span><span class="text-sm text-gray-400">${ts}</span>`;
+        activityDiv.prepend(newDiv);
+        while(activityDiv.children.length>10) activityDiv.lastChild.remove();
+      }
+
+      function initChart(){
+        const ctx = document.getElementById('votingChart')?.getContext('2d');
+        if(!ctx){ console.warn('Chart canvas missing'); return; }
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul'],
+            datasets: [
+              { label:'YES Votes (in millions)', data:[0.5,0.8,1.2,1.7,2.1,2.5,2.847392], borderColor:'rgb(34,197,94)', backgroundColor:'rgba(34,197,94,0.1)', tension:0.4, fill:true },
+              { label:'NO Votes (in thousands)', data:[20,35,48,67,89,123,156.234], borderColor:'rgb(239,68,68)', backgroundColor:'rgba(239,68,68,0.1)', tension:0.4, fill:true }
+            ]
+          },
+          options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ labels:{ color:'white' } } },
+            scales:{
+              x:{ ticks:{ color:'white' }, grid:{ color:'rgba(255,255,255,.1)' } },
+              y:{ beginAtZero:true, ticks:{ color:'white' }, grid:{ color:'rgba(255,255,255,.1)' }, title:{ display:true, text:'Votes', color:'white' } }
+            }
+          }
+        });
+      }
+
+      function updateChart(){
+        if(!chart) return;
+        const yesM = currentData.yes/1_000_000; const noK = currentData.no/1_000;
+        const yi = chart.data.datasets[0].data.length-1;
+        const ni = chart.data.datasets[1].data.length-1;
+        chart.data.datasets[0].data[yi] = +yesM.toFixed(6);
+        chart.data.datasets[1].data[ni] = +noK.toFixed(3);
+        chart.update();
+      }
+
+      function createStarfield(){
+        const starfield = document.getElementById('starfield');
+        const numStars = 150;
+        const frag = document.createDocumentFragment();
+        for(let i=0;i<numStars;i++){
+          const s = document.createElement('div');
+          s.className='star'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+          const w = (Math.random()*2+1)+'px'; s.style.width=w; s.style.height=w; s.style.animationDelay=Math.random()*3+'s';
+          frag.appendChild(s);
+        }
+        starfield.appendChild(frag);
+      }
+
+      // ------------------ Voting flow ------------------
+      const modal = document.getElementById('verificationModal');
+      const openModal = ()=>{ modal.classList.remove('hidden'); modal.classList.add('flex'); document.getElementById('verificationCode').focus(); };
+      const closeModal = ()=>{ modal.classList.add('hidden'); modal.classList.remove('flex'); document.getElementById('verificationCode').value=''; pendingVote=null; pendingEmail=null; };
+
+      document.getElementById('cancelVerify').addEventListener('click', (e)=>{ e.preventDefault(); closeModal(); });
+      document.getElementById('confirmVerify').addEventListener('click', (e)=>{
+        e.preventDefault();
+        const code = (document.getElementById('verificationCode').value||'').trim();
+        if(!/^\d{6}$/.test(code)){ showToast('Enter a valid 6-digit code', false); return; }
+        // Demo acceptance
+        votedUsers.add(pendingEmail.toLowerCase()); persistVoters();
+        if(pendingVote==='yes'){ currentData.yes++; showToast('Thank you! Your YES vote has been recorded! 🇮🇳'); }
+        else { currentData.no++; showToast('Thank you! Your vote has been recorded.'); }
+        updateDisplay(); addRecentActivity(pendingVote, pendingEmail); updateChart();
+        document.getElementById('voteForm').reset(); closeModal(); processing=false;
+      });
+
+      document.getElementById('voteForm').addEventListener('submit', (e)=>{
+        e.preventDefault(); if(processing) return; processing=true;
+        const choiceEl = document.querySelector('input[name="vote"]:checked');
+        const email = (document.getElementById('userEmail').value||'').trim();
+        if(!choiceEl){ showToast('Please select YES or NO', false); processing=false; return; }
+        if(!email || !isValidEmail(email)){ showToast('Enter a valid email', false); processing=false; return; }
+        const key = email.toLowerCase();
+        if(votedUsers.has(key)){ showToast('You have already voted!', false); processing=false; return; }
+        pendingVote = choiceEl.value; pendingEmail = key; openModal();
+      });
+
+      // ------------------ Boot ------------------
+      document.addEventListener('DOMContentLoaded', ()=>{
+        createStarfield(); updateDisplay(); initChart();
+        // Seed recent activity (visual only)
+        const activityDiv = document.getElementById('recentActivity');
+        const samples = [
+          { vote:'yes', email:'raj***@gmail.com', time:'2 min ago' },
+          { vote:'yes', email:'pri***@yahoo.com', time:'3 min ago' },
+          { vote:'no',  email:'sam***@hotmail.com', time:'5 min ago' },
+          { vote:'yes', email:'anu***@gmail.com', time:'7 min ago' }
+        ];
+        for(const a of samples){
+          const d=document.createElement('div'); d.className='flex justify-between items-center p-2 bg-gray-800/30 rounded border border-gray-600';
+          d.innerHTML=`<span class='text-gray-200'>${a.email} voted <strong class='${a.vote==='yes'?'text-green-400':'text-red-400'}'>${a.vote.toUpperCase()}</strong></span><span class='text-sm text-gray-400'>${a.time}</span>`;
+          activityDiv.appendChild(d);
+        }
+      });
+
+      // ------------------ Tiny tests (console) ------------------
+      console.groupCollapsed('%cSelf-tests','color:#9cf');
+      console.assert(isValidEmail('a@b.com') && !isValidEmail('bad@'), 'Email validation');
+      const p = calcProgress(2_847_392, 10_000_000); console.assert(p.pct>28 && p.pct<29, 'Progress calc');
+      console.assert(maskEmail('rajiv@example.com').startsWith('raj***@'), 'Mask email');
+      console.groupEnd();
+    })();
+  </script>
+</body>
+</html>
